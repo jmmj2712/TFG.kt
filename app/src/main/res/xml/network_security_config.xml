@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+    <!-- Puedes permitir cleartext solo para ciertos dominios, por ejemplo: -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain>localhost</domain>
+        <!-- Si usas IP en lugar de localhost, añade la IP aquí -->
+    </domain-config>
+</network-security-config>
