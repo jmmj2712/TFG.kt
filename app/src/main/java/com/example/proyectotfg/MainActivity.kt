@@ -22,12 +22,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var adapter: ProductosAdapter
 
-    // Lista completa recibida de la API
     private var currentProductos: List<Producto> = emptyList()
-    // Filtro activo de tamaño
     private var currentSizeFilter: String = "Pequeño"
-
-    // Para el resumen de compra
     private var productosSeleccionados = mutableListOf<Pair<String, Double>>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,16 +31,14 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Setup RecyclerView (3 columnas)
         binding.recyclerViewProductos.layoutManager = GridLayoutManager(this, 3)
         adapter = ProductosAdapter(emptyList(), this) { producto ->
             Toast.makeText(this, "Producto: ${producto.producto}", Toast.LENGTH_SHORT).show()
             mostrarDetalle(producto)
-            agregarAlResumen(producto.producto, producto.precio)
+            agregarAlResumen(producto.producto, producto.precio )
         }
         binding.recyclerViewProductos.adapter = adapter
 
-        // Botones de marca
         binding.imageButtonRefresco.setOnClickListener { cargar("Cordero") }
         binding.imageButtonFini      .setOnClickListener { cargar("Fini") }
         binding.imageButtonChurruca  .setOnClickListener { cargar("Churruca") }
@@ -60,7 +54,6 @@ class MainActivity : AppCompatActivity() {
         binding.imageButtonJumpers   .setOnClickListener { cargar("Jumpers") }
         binding.imageButtonGato      .setOnClickListener { cargar("Gatos") }
 
-        // Botones de tamaño
         binding.buttonPequeno.setOnClickListener {
             currentSizeFilter = "Pequeño"
             aplicarFiltro()
@@ -70,28 +63,20 @@ class MainActivity : AppCompatActivity() {
             aplicarFiltro()
         }
 
-        // Nuevo pedido
         binding.buttonNuevoPedido.setOnClickListener { nuevoPedido() }
+        binding.buttonEditar     .setOnClickListener { startActivity(Intent(this, StoreActivity::class.java)) }
+        binding.buttonAddProduct .setOnClickListener { startActivity(Intent(this, AddProductActivity::class.java)) }
 
-        // Ir a editar stock
-        binding.buttonEditar.setOnClickListener {
-            startActivity(Intent(this, StoreActivity::class.java))
-        }
-
-        // Ir a añadir producto
-        binding.buttonAddProduct.setOnClickListener {
-            startActivity(Intent(this, AddProductActivity::class.java))
-        }
+        // Carga inicial
+        cargar("Cordero")
     }
 
-    private fun mostrarDetalle(p: Producto) {
-        binding.textViewProducto.text = p.producto
-        binding.textViewTotal.text = String.format("%.2f €", p.precio)
-        binding.textViewProducto.visibility = View.VISIBLE
-    }
-
-    private fun cargar(marca: String) {
-        RetrofitClient.instance.getProductosPorMarca(marca)
+    /**
+     * Ahora acepta String? y por dentro lo convierte a non-null.
+     */
+    fun cargar(marca: String?) {
+        val marcaNonNull = marca ?: ""
+        RetrofitClient.instance.getProductosPorMarca(marcaNonNull)
             .enqueue(object : Callback<List<Producto>> {
                 override fun onResponse(call: Call<List<Producto>>, response: Response<List<Producto>>) {
                     if (!response.isSuccessful) {
@@ -99,52 +84,45 @@ class MainActivity : AppCompatActivity() {
                         return
                     }
                     currentProductos = response.body() ?: emptyList()
-                    Log.d("API", "Totales recibidos: ${currentProductos.size}")
-
-                    // **1) Mostrar TODO** para verificar que funciona
+                    Log.d("API", "Recibidos: ${currentProductos.size}")
                     adapter.updateProductos(currentProductos)
-                    Log.d("API", "Adapter trazó ${currentProductos.size} ítems")
-
-                    // Si quieres el filtro, en lugar de la línea de arriba, usas:
-                    // aplicarFiltro()
                 }
-
                 override fun onFailure(call: Call<List<Producto>>, t: Throwable) {
                     Toast.makeText(this@MainActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
                 }
             })
     }
 
-    // Si descomentas en cargar(), aplica el filtro de tamaño
     private fun aplicarFiltro() {
         val filtrados = currentProductos.filter {
             it.tamano.equals(currentSizeFilter, ignoreCase = true)
         }
         adapter.updateProductos(filtrados)
-        Log.d("API", "Adapter filtrado trazó ${filtrados.size} ítems de tamaño $currentSizeFilter")
+    }
+
+    private fun mostrarDetalle(p: Producto) {
+        binding.textViewProducto.text = p.producto
+        binding.textViewTotal.text    = String.format("%.2f €", p.precio ?: 0.0)
+        binding.textViewProducto.visibility = View.VISIBLE
     }
 
     private fun agregarAlResumen(nombre: String, precio: Double) {
         val fila = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            val tvN = TextView(context).apply {
+            addView(TextView(context).apply {
                 text = nombre
                 layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-            }
-            val tvP = TextView(context).apply {
+            })
+            addView(TextView(context).apply {
                 text = String.format("%.2f €", precio)
                 layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT)
-            }
-            addView(tvN); addView(tvP)
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+            })
         }
         binding.layoutResumen.addView(fila)
-        productosSeleccionados.add(Pair(nombre, precio))
-        actualizarTotal()
-    }
-
-    private fun actualizarTotal() {
+        productosSeleccionados.add(nombre to precio)
         val total = productosSeleccionados.sumOf { it.second }
         binding.textViewTotal.text = String.format("%.2f €", total)
     }

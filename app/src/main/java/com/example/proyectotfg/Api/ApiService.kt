@@ -1,14 +1,9 @@
 package com.example.proyectotfg.Api
 
-import retrofit2.Call
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Query
 import com.example.proyectotfg.DataBase.Producto
 import com.example.proyectotfg.DataBase.Almacen
-import retrofit2.http.Field
-import retrofit2.http.FormUrlEncoded
+import retrofit2.Call
+import retrofit2.http.*
 
 interface ApiService {
     @GET("api/getProductos.php")
@@ -20,12 +15,20 @@ interface ApiService {
     @POST("api/addProducto.php")
     fun addProducto(@Body req: AddProductoRequest): Call<AddProductoResponse>
 
-    @POST("api/deleteProducto.php")
     @FormUrlEncoded
+    @POST("api/deleteProducto.php")
     fun deleteProducto(
         @Field("id") id: Int
     ): Call<AddProductoResponse>
 
+    @FormUrlEncoded
+    @POST("api/available.php")
+    fun available(
+        @Field("id") id: Int,
+        @Field("disponibles") disponibles: Int
+    ): Call<AddProductoResponse>
+
+    /** Método completo para editar producto, si lo necesitas aún */
     @FormUrlEncoded
     @POST("api/editProducto.php")
     fun editProducto(
@@ -40,4 +43,3 @@ interface ApiService {
         @Field("fechaCaducidad") fechaCaducidad: String?
     ): Call<AddProductoResponse>
 }
-

@@ -4,23 +4,23 @@ import com.google.gson.annotations.SerializedName
 
 data class Producto(
     @SerializedName("ID")
-    val id: Int,
+    val id: Int = 0,
 
     @SerializedName("Producto")
-    val producto: String,
+    val producto: String = "",
 
     @SerializedName("Tamano")
-    val tamano: String,
+    val tamano: String = "",
 
     @SerializedName("Precio")
-    val precio: Double,
+    val precio: Double = 0.0,
 
     @SerializedName("Marca")
-    val marca: String,
+    val marca: String = "",
 
     @SerializedName("Disponibles")
-    val disponibles: Int,
+    val disponibles: Int = 0,
 
     @SerializedName("Almacen")
-    val almacen: Int
+    val almacen: Int = 0
 )

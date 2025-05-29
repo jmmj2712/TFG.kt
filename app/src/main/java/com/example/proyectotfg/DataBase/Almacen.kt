@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName
 data class Almacen(
     @SerializedName("ID")
     val id: Int,
+
     @SerializedName("Producto")
     val producto: String,
 
@@ -29,3 +30,4 @@ data class Almacen(
     @SerializedName("FechaCaducidad")
     val fechaCaducidad: String?
 )
+

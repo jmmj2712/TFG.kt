@@ -1,14 +1,18 @@
 package com.example.proyectotfg
 
 import android.app.AlertDialog
+import android.app.DatePickerDialog
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
+import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
-import android.widget.AutoCompleteTextView
 import android.widget.PopupMenu
+import android.widget.TextView
 import android.widget.Toast
 import com.example.proyectotfg.Api.AddProductoResponse
 import com.example.proyectotfg.Api.RetrofitClient
@@ -16,6 +20,7 @@ import com.example.proyectotfg.DataBase.Almacen
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.util.Calendar
 
 class AlmacenItemActions(private val context: Context) {
 
@@ -27,7 +32,11 @@ class AlmacenItemActions(private val context: Context) {
         "Jumpers", "Gato"
     )
 
+    /**
+     * Sólo vincula acciones a productos en almacén (almacen == 1)
+     */
     fun bindRowClick(rowView: View, item: Almacen, onUpdated: () -> Unit) {
+        if (item.almacen != 1) return
         rowView.setOnClickListener {
             PopupMenu(context, rowView).apply {
                 menu.add("Modificar")
@@ -58,15 +67,14 @@ class AlmacenItemActions(private val context: Context) {
                                 Toast.makeText(context, "Eliminado con éxito", Toast.LENGTH_SHORT).show()
                                 onDeleted()
                             } else {
-                                Toast.makeText(
-                                    context,
-                                    "Error: ${resp.body()?.message ?: resp.code()}",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                Log.e("DeleteProducto", "HTTP ${resp.code()} - ${resp.errorBody()?.string()}")
+                                Toast.makeText(context, "Error servidor: ${resp.code()}", Toast.LENGTH_LONG).show()
                             }
                         }
+
                         override fun onFailure(call: Call<AddProductoResponse>, t: Throwable) {
-                            Toast.makeText(context, "Fallo de red", Toast.LENGTH_SHORT).show()
+                            Log.e("DeleteProducto", "Fallo de red", t)
+                            Toast.makeText(context, "Fallo de red: ${t.localizedMessage}", Toast.LENGTH_LONG).show()
                         }
                     })
             }
@@ -78,7 +86,7 @@ class AlmacenItemActions(private val context: Context) {
         val dialogView = LayoutInflater.from(context)
             .inflate(R.layout.dialog_edit_item, null)
 
-        // References
+        // Referencias
         val etProd  = dialogView.findViewById<EditText>(R.id.etProducto)
         val etSize  = dialogView.findViewById<AutoCompleteTextView>(R.id.etTamano)
         val etPrice = dialogView.findViewById<EditText>(R.id.etPrecio)
@@ -86,63 +94,73 @@ class AlmacenItemActions(private val context: Context) {
         val cbDisp  = dialogView.findViewById<CheckBox>(R.id.cbDisponibles)
         val cbAlm   = dialogView.findViewById<CheckBox>(R.id.cbAlmacen)
         val etCant  = dialogView.findViewById<EditText>(R.id.etCantidad)
-        val etDate  = dialogView.findViewById<EditText>(R.id.etFechaCaducidad)
+        val btnDate = dialogView.findViewById<Button>(R.id.btnDateFilter)
+        val tvDate  = dialogView.findViewById<TextView>(R.id.tvFechaSeleccionada)
 
-        // Configurar AutoComplete
+        // AutoComplete
         etSize.setAdapter(ArrayAdapter(context, android.R.layout.simple_list_item_1, tamaños))
         etSize.threshold = 1
         etBrand.setAdapter(ArrayAdapter(context, android.R.layout.simple_list_item_1, marcas))
         etBrand.threshold = 1
 
-        // Precargar valores
+        // Precargar datos
         etProd.setText(item.producto)
         etSize.setText(item.tamano, false)
         etPrice.setText(item.precio.toString())
         etBrand.setText(item.marca, false)
         cbDisp.isChecked = item.disponibles == 1
-        cbAlm .isChecked = item.almacen     == 1
+        cbAlm .isChecked = true  // siempre en almacén
         etCant.setText(item.cantidad?.toString() ?: "")
-        etDate.setText(item.fechaCaducidad)
+        tvDate.text = item.fechaCaducidad ?: "--/--/----"
+
+        // DatePicker
+        btnDate.setOnClickListener {
+            val parts = item.fechaCaducidad?.split("/")?.mapNotNull { it.toIntOrNull() }
+            val cal = Calendar.getInstance().apply {
+                if (parts != null && parts.size == 3) set(parts[2], parts[1]-1, parts[0])
+            }
+            DatePickerDialog(
+                context,
+                { _, year, month, day ->
+                    val text = String.format("%02d/%02d/%04d", day, month+1, year)
+                    tvDate.text = text
+                },
+                cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)
+            ).show()
+        }
 
         AlertDialog.Builder(context)
             .setTitle("Modificar “${item.producto}”")
             .setView(dialogView)
             .setPositiveButton("Guardar") { _, _ ->
-                // Leer nuevos valores
+                // Lectura nuevos valores
                 val newProd  = etProd.text.toString().trim()
                 val newSize  = etSize.text.toString().trim()
                 val newPrice = etPrice.text.toString().toDoubleOrNull()
                 val newBrand = etBrand.text.toString().trim()
                 val newDisp  = if (cbDisp.isChecked) 1 else 0
-                val newAlm   = if (cbAlm.isChecked ) 1 else 0
+                val newAlm   = 1
                 val newCant  = etCant.text.toString().toIntOrNull()
-                val newDate  = etDate.text.toString().trim()
+                val newDate  = tvDate.text.toString().trim()
 
-                // Validar
+                // Validaciones
                 if (newProd.isEmpty() || newSize.isEmpty() || newPrice == null || newBrand.isEmpty()) {
-                    Toast.makeText(context, "Rellena todos los campos básicos", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Rellena campos básicos", Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
-                if (newAlm == 1 && (newCant == null || newDate.isEmpty())) {
+                if (newCant == null || newDate.isEmpty() || newDate == "--/--/----") {
                     Toast.makeText(context, "Cantidad y fecha requeridas", Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
 
-                // Confirmar y enviar update
+                // Confirmar
                 AlertDialog.Builder(context)
                     .setTitle("Confirmar cambios")
-                    .setMessage("¿Deseas guardar cambios en “$newProd”?")
+                    .setMessage("Guardar cambios en “$newProd”?")
                     .setPositiveButton("Sí") { _, _ ->
                         RetrofitClient.instance.editProducto(
-                            item.id,
-                            newProd,
-                            newSize,
-                            newPrice,
-                            newBrand,
-                            newDisp,
-                            newAlm,
-                            newCant,
-                            newDate
+                            item.id, newProd, newSize, newPrice,
+                            newBrand, newDisp, newAlm, newCant, newDate
                         ).enqueue(object: Callback<AddProductoResponse> {
                             override fun onResponse(
                                 call: Call<AddProductoResponse>,
@@ -152,11 +170,13 @@ class AlmacenItemActions(private val context: Context) {
                                     Toast.makeText(context, "Actualizado correctamente", Toast.LENGTH_SHORT).show()
                                     onUpdated()
                                 } else {
-                                    Toast.makeText(context, "Error: ${resp.body()?.message}", Toast.LENGTH_SHORT).show()
+                                    Log.e("EditProducto", "HTTP ${resp.code()} - ${resp.errorBody()?.string()}")
+                                    Toast.makeText(context, "Error servidor: ${resp.code()}", Toast.LENGTH_LONG).show()
                                 }
                             }
                             override fun onFailure(call: Call<AddProductoResponse>, t: Throwable) {
-                                Toast.makeText(context, "Fallo de red", Toast.LENGTH_SHORT).show()
+                                Log.e("EditProducto", "Fallo de red", t)
+                                Toast.makeText(context, "Fallo de red: ${t.localizedMessage}", Toast.LENGTH_LONG).show()
                             }
                         })
                     }

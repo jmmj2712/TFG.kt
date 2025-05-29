@@ -33,9 +33,8 @@ class StoreActivity : AppCompatActivity() {
     private var sizeFilter: String? = null
     private var toDate: Date? = null
 
-    // Formateadores
+    // Formateador para mostrar y parsear la fecha "dd/MM/yyyy"
     private val displaySdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-    private val apiSdf     = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -106,9 +105,9 @@ class StoreActivity : AppCompatActivity() {
         popup.menu.add("Todas")
         allItems.mapNotNull { it.marca }.distinct().sorted()
             .forEach { popup.menu.add(it) }
-        popup.setOnMenuItemClickListener { item ->
-            brandFilter = item.title.toString().takeIf { it != "Todas" }
-            binding.btnBrandFilter.text = item.title
+        popup.setOnMenuItemClickListener { menuItem ->
+            brandFilter = menuItem.title.toString().takeIf { it != "Todas" }
+            binding.btnBrandFilter.text = menuItem.title
             applyFilters()
             true
         }
@@ -120,9 +119,9 @@ class StoreActivity : AppCompatActivity() {
         popup.menu.add("Todos")
         popup.menu.add("Pequeño")
         popup.menu.add("Grande")
-        popup.setOnMenuItemClickListener { item ->
-            sizeFilter = item.title.toString().takeIf { it != "Todos" }
-            binding.btnSizeFilter.text = item.title
+        popup.setOnMenuItemClickListener { menuItem ->
+            sizeFilter = menuItem.title.toString().takeIf { it != "Todos" }
+            binding.btnSizeFilter.text = menuItem.title
             applyFilters()
             true
         }
@@ -133,9 +132,9 @@ class StoreActivity : AppCompatActivity() {
         val cal = Calendar.getInstance()
         DatePickerDialog(
             this,
-            { _, y, m, d ->
+            { _, year, month, dayOfMonth ->
                 toDate = Calendar.getInstance().apply {
-                    set(y, m, d, 23, 59, 59)
+                    set(year, month, dayOfMonth, 23, 59, 59)
                 }.time
                 binding.btnDateFilter.text = displaySdf.format(toDate!!)
                 applyFilters()
@@ -163,8 +162,9 @@ class StoreActivity : AppCompatActivity() {
         toDate?.let { cutoff ->
             filtered = filtered.filter { item ->
                 item.fechaCaducidad
-                    ?.let { apiSdf.parse(it)?.time }
-                    ?.let { t -> t <= cutoff.time } ?: false
+                    ?.let { displaySdf.parse(it)?.time }  // parseamos con displaySdf
+                    ?.let { t -> t <= cutoff.time }
+                    ?: false
             }
         }
 
@@ -194,19 +194,24 @@ class StoreActivity : AppCompatActivity() {
             }
 
             row.addView(TextView(this).apply {
-                setPadding(8,8,8,8); text = item.cantidad?.toString() ?: "—"
+                setPadding(8, 8, 8, 8)
+                text = item.cantidad?.toString() ?: "—"
             })
             row.addView(TextView(this).apply {
-                setPadding(8,8,8,8); text = item.producto ?: "—"
+                setPadding(8, 8, 8, 8)
+                text = item.producto ?: "—"
             })
             row.addView(TextView(this).apply {
-                setPadding(8,8,8,8); text = item.marca    ?: "—"
+                setPadding(8, 8, 8, 8)
+                text = item.marca    ?: "—"
             })
             row.addView(TextView(this).apply {
-                setPadding(8,8,8,8); text = item.tamano   ?: "—"
+                setPadding(8, 8, 8, 8)
+                text = item.tamano   ?: "—"
             })
             row.addView(TextView(this).apply {
-                setPadding(8,8,8,8); text = item.fechaCaducidad ?: "—"
+                setPadding(8, 8, 8, 8)
+                text = item.fechaCaducidad ?: "—"
             })
 
             // 2) Bindea el menú Modificar/Eliminar
