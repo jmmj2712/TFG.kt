@@ -35,7 +35,7 @@ class AddProductActivity : AppCompatActivity() {
 
         // Configurar NumberPicker programáticamente
         binding.npCantidad.minValue = 1
-        binding.npCantidad.maxValue = 20
+        binding.npCantidad.maxValue = 1
 
         // AutoComplete para tamaño
         binding.etTamano.setAdapter(

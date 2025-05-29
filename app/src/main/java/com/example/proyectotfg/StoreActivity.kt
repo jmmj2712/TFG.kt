@@ -33,7 +33,7 @@ class StoreActivity : AppCompatActivity() {
     private var sizeFilter: String? = null
     private var toDate: Date? = null
 
-    // Formateador para mostrar y parsear la fecha "dd/MM/yyyy"
+    // Formateador para mostrar/parsear "dd/MM/yyyy"
     private val displaySdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,10 +43,28 @@ class StoreActivity : AppCompatActivity() {
 
         itemActions = AlmacenItemActions(this)
 
-        // Inicializar botones de filtro
+        // Inicializar textos
         binding.btnBrandFilter.text = "Todas"
-        binding.btnSizeFilter .text = "Todos"
-        binding.btnDateFilter .text = "Fecha"
+        binding.btnSizeFilter.text  = "Tamaño"
+        binding.btnDateFilter.text  = "Fecha"
+
+        // Botón «Reiniciar filtros»
+        binding.btnResetFilters.setOnClickListener {
+            // Limpiar filtros
+            nameFilter  = null
+            brandFilter = null
+            sizeFilter  = null
+            toDate      = null
+
+            // Reset UI
+            binding.etFilterName.text?.clear()
+            binding.btnBrandFilter.text = "Todas"
+            binding.btnSizeFilter.text  = "Tamaño"
+            binding.btnDateFilter.text  = "Fecha"
+
+            // Mostrar todo sin filtros
+            showInTable(allItems)
+        }
 
         // Filtrar por nombre
         binding.btnApplyNameFilter.setOnClickListener {
@@ -56,11 +74,11 @@ class StoreActivity : AppCompatActivity() {
         }
         // Marca y tamaño
         binding.btnBrandFilter.setOnClickListener { showBrandMenu() }
-        binding.btnSizeFilter .setOnClickListener { showSizeMenu() }
+        binding.btnSizeFilter.setOnClickListener { showSizeMenu() }
         // Fecha de corte
         binding.btnDateFilter.setOnClickListener { pickCutoffDate() }
 
-        // Volver
+        // Botón volver
         binding.buttonVolver.setOnClickListener { finish() }
 
         // Carga inicial
@@ -69,10 +87,7 @@ class StoreActivity : AppCompatActivity() {
 
     private fun loadAlmacen() {
         RetrofitClient.instance.getAlmacen().enqueue(object: Callback<List<Almacen>> {
-            override fun onResponse(
-                call: Call<List<Almacen>>,
-                response: Response<List<Almacen>>
-            ) {
+            override fun onResponse(call: Call<List<Almacen>>, response: Response<List<Almacen>>) {
                 if (!response.isSuccessful) {
                     Toast.makeText(
                         this@StoreActivity,
@@ -83,11 +98,10 @@ class StoreActivity : AppCompatActivity() {
                 }
                 allItems = response.body().orEmpty()
 
-                // Programar notificaciones para cada item
+                // Programar notificaciones
                 allItems.forEach { item ->
                     NotificationWorker.programar(this@StoreActivity, item)
                 }
-
                 showInTable(allItems)
             }
             override fun onFailure(call: Call<List<Almacen>>, t: Throwable) {
@@ -116,11 +130,10 @@ class StoreActivity : AppCompatActivity() {
 
     private fun showSizeMenu() {
         val popup = android.widget.PopupMenu(this, binding.btnSizeFilter)
-        popup.menu.add("Todos")
-        popup.menu.add("Pequeño")
         popup.menu.add("Grande")
+        popup.menu.add("Pequeño")
         popup.setOnMenuItemClickListener { menuItem ->
-            sizeFilter = menuItem.title.toString().takeIf { it != "Todos" }
+            sizeFilter = menuItem.title.toString()
             binding.btnSizeFilter.text = menuItem.title
             applyFilters()
             true
@@ -132,9 +145,9 @@ class StoreActivity : AppCompatActivity() {
         val cal = Calendar.getInstance()
         DatePickerDialog(
             this,
-            { _, year, month, dayOfMonth ->
+            { _, year, month, day ->
                 toDate = Calendar.getInstance().apply {
-                    set(year, month, dayOfMonth, 23, 59, 59)
+                    set(year, month, day, 23, 59, 59)
                 }.time
                 binding.btnDateFilter.text = displaySdf.format(toDate!!)
                 applyFilters()
@@ -162,9 +175,8 @@ class StoreActivity : AppCompatActivity() {
         toDate?.let { cutoff ->
             filtered = filtered.filter { item ->
                 item.fechaCaducidad
-                    ?.let { displaySdf.parse(it)?.time }  // parseamos con displaySdf
-                    ?.let { t -> t <= cutoff.time }
-                    ?: false
+                    ?.let { displaySdf.parse(it)?.time }
+                    ?.let { t -> t <= cutoff.time } ?: false
             }
         }
 
@@ -181,51 +193,43 @@ class StoreActivity : AppCompatActivity() {
 
     private fun showInTable(items: List<Almacen>) {
         val table = binding.tableLayoutAlmacen
-        // Limpiar filas antiguas (dejando solo la cabecera)
         if (table.childCount > 1) table.removeViews(1, table.childCount - 1)
 
         items.forEach { item ->
-            // 1) Crear la fila normal
             val row = TableRow(this).apply {
                 layoutParams = TableRow.LayoutParams(
                     TableRow.LayoutParams.MATCH_PARENT,
                     TableRow.LayoutParams.WRAP_CONTENT
                 )
             }
-
             row.addView(TextView(this).apply {
-                setPadding(8, 8, 8, 8)
+                setPadding(8,8,8,8)
                 text = item.cantidad?.toString() ?: "—"
             })
             row.addView(TextView(this).apply {
-                setPadding(8, 8, 8, 8)
+                setPadding(8,8,8,8)
                 text = item.producto ?: "—"
             })
             row.addView(TextView(this).apply {
-                setPadding(8, 8, 8, 8)
-                text = item.marca    ?: "—"
+                setPadding(8,8,8,8)
+                text = item.marca ?: "—"
             })
             row.addView(TextView(this).apply {
-                setPadding(8, 8, 8, 8)
-                text = item.tamano   ?: "—"
+                setPadding(8,8,8,8)
+                text = item.tamano ?: "—"
             })
             row.addView(TextView(this).apply {
-                setPadding(8, 8, 8, 8)
+                setPadding(8,8,8,8)
                 text = item.fechaCaducidad ?: "—"
             })
 
-            // 2) Bindea el menú Modificar/Eliminar
             itemActions.bindRowClick(row, item) { loadAlmacen() }
-
-            // 3) Añadir la fila al TableLayout
             table.addView(row)
 
-            // 4) Crear e insertar el divisor justo después de la fila
             val divider = View(this).apply {
-                val heightPx = (resources.displayMetrics.density + 0.5f).roundToInt()
+                val h = (resources.displayMetrics.density + 0.5f).roundToInt()
                 layoutParams = TableRow.LayoutParams(
-                    TableRow.LayoutParams.MATCH_PARENT,
-                    heightPx
+                    TableRow.LayoutParams.MATCH_PARENT, h
                 )
                 setBackgroundColor(Color.BLACK)
             }

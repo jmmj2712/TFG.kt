@@ -31,11 +31,12 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-            <!-- Filtrar por nombre (sigue siendo EditText + OK normal) -->
+            <!-- Filtrar por nombre -->
             <EditText
                 android:id="@+id/etFilterName"
-                android:layout_width="600dp"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:hint="Filtrar nombre…"
                 android:padding="8dp"/>
 
@@ -46,7 +47,7 @@
                 android:layout_marginStart="8dp"
                 android:text="OK"/>
 
-            <!-- Filtrar por marca convertido en MaterialButton outlined -->
+            <!-- Filtrar por marca -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnBrandFilter"
                 style="@style/Widget.Material3.Button.OutlinedButton"
@@ -54,16 +55,11 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:text="Marca"
-                android:textColor="@android:color/black"
                 app:backgroundTint="@android:color/white"
                 app:strokeColor="@android:color/black"
-                app:strokeWidth="2dp"
-                app:iconTint="@android:color/black"
-                app:iconGravity="textStart"
-                app:iconPadding="8dp"
-                app:iconSize="24dp"/>
+                app:strokeWidth="2dp"/>
 
-            <!-- Filtrar por fecha convertido en MaterialButton outlined -->
+            <!-- Filtrar por fecha -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnDateFilter"
                 style="@style/Widget.Material3.Button.OutlinedButton"
@@ -71,15 +67,11 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:text="Fecha"
-                android:textColor="@android:color/black"
                 app:backgroundTint="@android:color/white"
                 app:strokeColor="@android:color/black"
-                app:strokeWidth="2dp"
-                app:iconTint="@android:color/black"
-                app:iconGravity="textStart"
-                app:iconPadding="8dp"
-                app:iconSize="24dp"/>
+                app:strokeWidth="2dp"/>
 
+            <!-- Filtrar por tamaño -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSizeFilter"
                 style="@style/Widget.Material3.Button.OutlinedButton"
@@ -87,14 +79,21 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:text="Tamaño"
-                android:textColor="@android:color/black"
                 app:backgroundTint="@android:color/white"
                 app:strokeColor="@android:color/black"
-                app:strokeWidth="2dp"
-                app:iconTint="@android:color/black"
-                app:iconGravity="textStart"
-                app:iconPadding="8dp"
-                app:iconSize="24dp"/>
+                app:strokeWidth="2dp"/>
+
+            <!-- NUEVO: Botón reiniciar filtros -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnResetFilters"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="Reiniciar"
+                app:backgroundTint="@android:color/white"
+                app:strokeColor="@android:color/black"
+                app:strokeWidth="2dp"/>
 
         </LinearLayout>
 
