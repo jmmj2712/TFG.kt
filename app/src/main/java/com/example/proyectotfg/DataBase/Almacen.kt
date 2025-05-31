@@ -30,4 +30,3 @@ data class Almacen(
     @SerializedName("FechaCaducidad")
     val fechaCaducidad: String?
 )
-

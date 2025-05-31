@@ -7,7 +7,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import com.google.gson.GsonBuilder
 
 object RetrofitClient {
-    private const val BASE_URL = "http://192.168.1.233/"
+    //private const val BASE_URL = "http://192.168.1.233/"
+    private const val BASE_URL = "http://192.168.18.178/"
 
     val instance: ApiService by lazy {
         // 1. Crea un interceptor para loguear cuerpo de peticiones y respuestas

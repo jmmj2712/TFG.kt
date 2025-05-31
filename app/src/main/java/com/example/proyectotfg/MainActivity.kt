@@ -55,11 +55,11 @@ class MainActivity : AppCompatActivity() {
         binding.imageButtonGrefusa  .setOnClickListener { cargar("Grefusa") }
         binding.imageButtonTosfrit  .setOnClickListener { cargar("Tosfrit") }
         binding.imageButtonReyes    .setOnClickListener { cargar("Reyes") }
-        binding.imageButtonKinder   .setOnClickListener { cargar("Kinder") }
-        binding.imageButtonRisi     .setOnClickListener { cargar("Risi") }
+        binding.imageButtonKinder   .setOnClickListener { cargar("Kinde") }
+        binding.imageButtonRisi     .setOnClickListener { cargar("Risis") }
         binding.imageButtonMatutano .setOnClickListener { cargar("Matutano") }
         binding.imageButtonJumpers  .setOnClickListener { cargar("Jumpers") }
-        binding.imageButtonGato     .setOnClickListener { cargar("Gato") }
+        binding.imageButtonGato     .setOnClickListener { cargar("Gatos") }
 
         // Botones de tamaño
         binding.buttonPequeno.setOnClickListener {
