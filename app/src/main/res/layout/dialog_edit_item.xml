@@ -9,7 +9,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingBottom="24dp">
 
         <!-- Producto -->
         <com.google.android.material.textfield.TextInputLayout
@@ -22,16 +23,16 @@
                 android:layout_height="wrap_content"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Tamaño (AutoComplete) -->
+        <!-- Tamaño -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Tamaño"
-            android:layout_marginTop="8dp">
+            android:layout_marginTop="8dp"
+            android:hint="Tamaño">
             <AutoCompleteTextView
                 android:id="@+id/etTamano"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="56dp"
                 android:inputType="text"/>
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -39,25 +40,25 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Precio"
-            android:layout_marginTop="8dp">
+            android:layout_marginTop="8dp"
+            android:hint="Precio">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etPrecio"
-                android:inputType="numberDecimal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Marca (AutoComplete) -->
+        <!-- Marca -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Marca"
-            android:layout_marginTop="8dp">
+            android:layout_marginTop="8dp"
+            android:hint="Marca">
             <AutoCompleteTextView
                 android:id="@+id/etMarca"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="56dp"
                 android:inputType="text"/>
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -66,36 +67,31 @@
             android:id="@+id/cbDisponibles"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Disponibles"
-            android:layout_marginTop="8dp"/>
+            android:layout_marginTop="8dp"
+            android:text="Disponibles"/>
 
-        <!-- Almacén -->
+        <!-- En Almacén -->
         <com.google.android.material.checkbox.MaterialCheckBox
             android:id="@+id/cbAlmacen"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:text="En Almacén"/>
 
-        <!-- Cantidad -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
+        <!-- Selección de fecha única -->
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="Cantidad"
-            android:layout_marginTop="8dp">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etCantidad"
-                android:inputType="number"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-        </com.google.android.material.textfield.TextInputLayout>
+            android:layout_marginTop="16dp"
+            android:text="Fecha caducidad"
+            android:textColor="@android:color/black"/>
 
-        <!-- Fecha Caducidad -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginTop="8dp">
+            android:layout_marginTop="4dp">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnDateFilter"
@@ -103,7 +99,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Seleccionar fecha"
-                android:textColor="@android:color/black"
                 app:backgroundTint="@android:color/white"
                 app:strokeColor="@android:color/black"
                 app:strokeWidth="2dp"/>

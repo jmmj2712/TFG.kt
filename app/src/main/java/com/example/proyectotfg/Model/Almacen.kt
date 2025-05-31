@@ -1,4 +1,4 @@
-package com.example.proyectotfg.DataBase
+package com.example.proyectotfg.Model
 
 import com.google.gson.annotations.SerializedName
 

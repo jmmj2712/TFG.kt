@@ -8,7 +8,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
 import com.example.proyectotfg.Api.AddProductoResponse
 import com.example.proyectotfg.Api.RetrofitClient
-import com.example.proyectotfg.DataBase.Producto
+import com.example.proyectotfg.Model.Producto
 import com.example.proyectotfg.databinding.ItemProductoBinding
 import retrofit2.Call
 import retrofit2.Callback

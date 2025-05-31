@@ -9,7 +9,7 @@ import androidx.work.Data
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import com.example.proyectotfg.DataBase.Almacen
+import com.example.proyectotfg.Model.Almacen
 import com.example.proyectotfg.R
 import java.text.SimpleDateFormat
 import java.util.*

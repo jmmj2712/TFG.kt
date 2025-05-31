@@ -7,6 +7,6 @@ data class AddProductoRequest(
     val marca: String,
     val disponibles: Int,
     val almacen: Int,
-    val cantidad: Int? = null,
-    val fechaCaducidad: String? = null
+    val cantidad: Int?,
+    val fechaCaducidad: String?
 )

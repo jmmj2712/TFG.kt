@@ -13,7 +13,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.proyectotfg.Api.RetrofitClient
-import com.example.proyectotfg.DataBase.Producto
+import com.example.proyectotfg.Model.Producto
 import com.example.proyectotfg.RecyclerView.ProductosAdapter
 import com.example.proyectotfg.databinding.ActivityMainBinding
 import retrofit2.Call

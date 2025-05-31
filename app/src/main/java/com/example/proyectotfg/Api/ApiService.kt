@@ -1,11 +1,12 @@
 package com.example.proyectotfg.Api
 
-import com.example.proyectotfg.DataBase.Producto
-import com.example.proyectotfg.DataBase.Almacen
+import com.example.proyectotfg.Model.Producto
+import com.example.proyectotfg.Model.Almacen
 import retrofit2.Call
 import retrofit2.http.*
 
 interface ApiService {
+
     /**
      * Devuelve todos los productos (filtrados por marca si se pasa el parámetro).
      * El JSON esperado por retrofit se mapeará a List<Producto>.
@@ -17,19 +18,29 @@ interface ApiService {
 
     /**
      * Devuelve todos los registros de stock (tabla `almacen` JOIN con `productos`).
-     * Ya no usamos marca aquí: el endpoint ignora el parámetro.
      */
     @GET("api/getAlmacen.php")
     fun getAlmacen(): Call<List<Almacen>>
 
     /**
      * Inserta un nuevo producto. El cuerpo JSON coincide con la data class AddProductoRequest.
-     * Responde AddProductoResponse (que normalmente contendrá { status: "ok", newId: X } u objeto de error).
+     * Responde AddProductoResponse (que normalmente contendrá { status: "ok", newId: X },
+     * o bien { status: "exists", existingId: Y } si ya existe).
      */
     @POST("api/addProducto.php")
     fun addProducto(
         @Body req: AddProductoRequest
     ): Call<AddProductoResponse>
+
+    /**
+     * Si el producto ya existe, este endpoint añade solo las fechas de caducidad
+     * para ese producto existente.
+     * El cuerpo JSON coincide con la data class AddAlmacenRequest.
+     */
+    @POST("api/addAlmacen.php")
+    fun addAlmacen(
+        @Body req: AddAlmacenRequest
+    ): Call<AddAlmacenResponse>
 
     /**
      * Elimina un producto dado su ID. Retorna AddProductoResponse con status ok/error.
@@ -68,4 +79,13 @@ interface ApiService {
         @Field("cantidad")       cantidad: Int?,
         @Field("fechaCaducidad") fechaCaducidad: String?
     ): Call<AddProductoResponse>
+
+    /**
+     * Consume un producto (disminuye en 1 su stock en almacen). Retorna ConsumeResponse.
+     */
+    @FormUrlEncoded
+    @POST("api/consumeProduct.php")
+    fun consumeProduct(
+        @Field("id") id: Int
+    ): Call<ConsumeResponse>
 }
