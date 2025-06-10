@@ -6,13 +6,14 @@
     android:layout_height="wrap_content"
     android:padding="16dp">
 
+    <!-- Contenedor vertical principal del diálogo de edición -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingBottom="24dp">
 
-        <!-- Producto -->
+        <!-- Campo para editar el nombre del producto -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -23,7 +24,7 @@
                 android:layout_height="wrap_content"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Tamaño -->
+        <!-- Selector de tamaño con autocompletado -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -36,7 +37,7 @@
                 android:inputType="text"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Precio -->
+        <!-- Campo de precio con entrada decimal -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -49,7 +50,7 @@
                 android:inputType="numberDecimal"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Marca -->
+        <!-- Selector de marca con autocompletado -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -62,7 +63,7 @@
                 android:inputType="text"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Disponibles -->
+        <!-- Checkbox para indicar si el producto está disponible -->
         <com.google.android.material.checkbox.MaterialCheckBox
             android:id="@+id/cbDisponibles"
             android:layout_width="wrap_content"
@@ -70,7 +71,7 @@
             android:layout_marginTop="8dp"
             android:text="Disponibles"/>
 
-        <!-- En Almacén -->
+        <!-- Checkbox para indicar si el producto está en almacén -->
         <com.google.android.material.checkbox.MaterialCheckBox
             android:id="@+id/cbAlmacen"
             android:layout_width="wrap_content"
@@ -78,7 +79,7 @@
             android:layout_marginTop="8dp"
             android:text="En Almacén"/>
 
-        <!-- Selección de fecha única -->
+        <!-- Sección para selección de fecha de caducidad -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -86,6 +87,7 @@
             android:text="Fecha caducidad"
             android:textColor="@android:color/black"/>
 
+        <!-- Contenedor horizontal con botón de fecha y texto de fecha seleccionada -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -93,6 +95,7 @@
             android:gravity="center_vertical"
             android:layout_marginTop="4dp">
 
+            <!-- Botón que abre el DatePickerDialog -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnDateFilter"
                 style="@style/Widget.Material3.Button.OutlinedButton"
@@ -103,6 +106,7 @@
                 app:strokeColor="@android:color/black"
                 app:strokeWidth="2dp"/>
 
+            <!-- TextView que muestra la fecha seleccionada -->
             <TextView
                 android:id="@+id/tvFechaSeleccionada"
                 android:layout_width="wrap_content"

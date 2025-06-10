@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- CardView que representa un producto en el RecyclerView -->
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="250dp"
     android:layout_height="wrap_content"
@@ -7,12 +9,13 @@
     app:cardElevation="4dp"
     android:layout_margin="8dp">
 
+    <!-- Contenedor interno para posicionar nombre, precio y botón -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="250dp"
         android:layout_height="wrap_content"
         android:padding="8dp">
 
-        <!-- Nombre -->
+        <!-- Nombre del producto -->
         <TextView
             android:id="@+id/nombre"
             android:layout_width="0dp"
@@ -20,11 +23,11 @@
             android:text="Producto"
             android:textColor="@android:color/black"
             android:textSize="18sp"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Precio -->
+        <!-- Precio del producto -->
         <TextView
             android:id="@+id/precio"
             android:layout_width="wrap_content"
@@ -35,16 +38,15 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/nombre" />
 
-        <!-- Botón Eliminar -->
+        <!-- Botón para marcar producto como no disponible -->
         <ImageButton
             android:id="@+id/btnDelete"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:src="@drawable/ic_delete"
             android:background="?attr/selectableItemBackgroundBorderless"
+            app:tint="@android:color/holo_red_dark"
             app:layout_constraintTop_toBottomOf="@id/precio"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:tint="@android:color/holo_red_dark" />
-
+            app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

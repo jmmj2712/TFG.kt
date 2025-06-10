@@ -6,5 +6,3 @@ data class AddProductoResponse(
     val newId: Int? = null,
     val existingId: Int? = null
 )
-
-

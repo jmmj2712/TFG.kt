@@ -19,12 +19,33 @@ import retrofit2.Response
 import java.text.SimpleDateFormat
 import java.util.*
 
+/**
+ * Actividad para gestionar y mostrar el inventario de almacén.
+ *
+ * - Descarga todos los registros (`almacen JOIN productos`) y programa notificaciones
+ *   de caducidad.
+// - Permite filtrar por nombre, marca, tamaño o fecha de caducidad.
+// - Agrupa los items iguales (mismo producto, marca y tamaño) mostrando recuento y próxima fecha.
+ */
 class StoreActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityStoreBinding
+
+    // Lista completa de registros recibidos de la API
     private var allItems = listOf<Almacen>()
+
+    // Formato para mostrar/parsear fechas en pantalla
     private val displaySdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
+    /**
+     * Datos agrupados para mostrar en la tabla:
+     * @param id          ID representativo del grupo (se toma el primero)
+     * @param product     Nombre del producto
+     * @param brand       Marca
+     * @param size        Tamaño ("Pequeño"/"Grande")
+     * @param count       Número de unidades en este grupo
+     * @param nextDate    Fecha mínima de caducidad formateada, o null si no aplica
+     */
     private data class GroupItem(
         val id: Int,
         val product: String,
@@ -39,10 +60,12 @@ class StoreActivity : AppCompatActivity() {
         binding = ActivityStoreBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Inicializamos textos de botones de filtro
         binding.btnBrandFilter.text = "Todas"
         binding.btnSizeFilter.text = "Tamaño"
         binding.btnDateFilter.text = "Fecha"
 
+        // Configuración de listeners para botones
         binding.buttonVolver.setOnClickListener { finish() }
         binding.btnResetFilters.setOnClickListener { resetFilters() }
         binding.btnApplyNameFilter.setOnClickListener { applyFilters() }
@@ -50,9 +73,14 @@ class StoreActivity : AppCompatActivity() {
         binding.btnSizeFilter.setOnClickListener { showSizeMenu() }
         binding.btnDateFilter.setOnClickListener { pickCutoffDate() }
 
+        // Carga inicial de datos
         loadAlmacen()
     }
 
+    /**
+     * Lanza la petición a la API para descargar todos los registros de almacén.
+     * Programa recordatorios de caducidad para cada item recibido.
+     */
     private fun loadAlmacen() {
         RetrofitClient.instance.getAlmacen().enqueue(object : Callback<List<Almacen>> {
             override fun onResponse(call: Call<List<Almacen>>, resp: Response<List<Almacen>>) {
@@ -61,6 +89,7 @@ class StoreActivity : AppCompatActivity() {
                     return
                 }
                 allItems = resp.body().orEmpty()
+                // Programar notificaciones 2 semanas antes de cada caducidad
                 allItems.forEach { NotificationWorker.programar(this@StoreActivity, it) }
                 showInTable(allItems)
             }
@@ -71,6 +100,7 @@ class StoreActivity : AppCompatActivity() {
         })
     }
 
+    /** Restablece todos los filtros y muestra la tabla completa. */
     private fun resetFilters() {
         binding.etFilterName.text?.clear()
         binding.btnBrandFilter.text = "Todas"
@@ -79,9 +109,11 @@ class StoreActivity : AppCompatActivity() {
         showInTable(allItems)
     }
 
+    /** Muestra un menú emergente con las marcas disponibles para filtrar. */
     private fun showBrandMenu() {
         val popup = android.widget.PopupMenu(this, binding.btnBrandFilter)
         popup.menu.add("Todas")
+        // Añade cada marca única de allItems al menú
         allItems.mapNotNull { it.marca }.distinct().sorted()
             .forEach { popup.menu.add(it) }
         popup.setOnMenuItemClickListener { mi ->
@@ -92,6 +124,7 @@ class StoreActivity : AppCompatActivity() {
         popup.show()
     }
 
+    /** Muestra un menú emergente para seleccionar filtro de tamaño (Grande/Pequeño). */
     private fun showSizeMenu() {
         val popup = android.widget.PopupMenu(this, binding.btnSizeFilter)
         popup.menu.add("Grande")
@@ -104,6 +137,10 @@ class StoreActivity : AppCompatActivity() {
         popup.show()
     }
 
+    /**
+     * Abre un selector de fecha para elegir la fecha de corte.
+     * Formatea el botón y vuelve a aplicar filtros.
+     */
     private fun pickCutoffDate() {
         val cal = Calendar.getInstance()
         DatePickerDialog(
@@ -118,6 +155,14 @@ class StoreActivity : AppCompatActivity() {
         ).show()
     }
 
+    /**
+     * Aplica todos los filtros seleccionados:
+     *  - Nombre (contiene texto)
+     *  - Marca (si no es "Todas")
+     *  - Tamaño (si no es "Tamaño")
+     *  - Fecha de caducidad (sólo items con fecha ≤ seleccionada)
+     * Muestra un diálogo si no hay resultados.
+     */
     private fun applyFilters() {
         var filtered = allItems
         val name = binding.etFilterName.text.toString().trim()
@@ -144,12 +189,18 @@ class StoreActivity : AppCompatActivity() {
         showInTable(filtered)
     }
 
+    /**
+     * Agrupa los [items] por (producto, marca, tamaño), calcula el número de unidades
+     * y la próxima fecha de caducidad, y construye dinámicamente las filas de la tabla.
+     * Cada fila se asocia a acciones (Modificar, Eliminar, Consumir) mediante AlmacenItemActions.
+     */
     private fun showInTable(items: List<Almacen>) {
-        // Agrupamos y además guardamos la lista original de Almacen en cada grupo
+        // Agrupación clave → lista de instancias
         val gruposConListas: List<Pair<GroupItem, List<Almacen>>> = items
             .groupBy { Triple(it.producto, it.marca, it.tamano) }
             .map { (key, listaCompleta) ->
                 val (prod, brand, size) = key
+                // Extrae y ordena fechas de caducidad para cada grupo
                 val fechas = listaCompleta.mapNotNull { it.fechaCaducidad }
                     .map { displaySdf.parse(it)!! }
                     .sorted()
@@ -165,10 +216,12 @@ class StoreActivity : AppCompatActivity() {
             }
 
         val table = binding.tableLayoutAlmacen
+        // Limpia filas previas (dejando sólo encabezado)
         if (table.childCount > 1) {
             table.removeViews(1, table.childCount - 1)
         }
 
+        // Construcción de cada fila y separador
         gruposConListas.forEach { (g, listaOriginal) ->
             val row = TableRow(this).apply {
                 layoutParams = TableRow.LayoutParams(
@@ -177,7 +230,7 @@ class StoreActivity : AppCompatActivity() {
                 )
             }
 
-            // Rellenar las celdas del TableRow
+            // Añade celdas: count, producto, marca, tamaño, nextDate
             listOf<Any>(
                 g.count.toString(),
                 g.product,
@@ -191,13 +244,14 @@ class StoreActivity : AppCompatActivity() {
                 })
             }
 
-            // Asociar el click para mostrar el PopupMenu mediante bindRowClick
+            // Asocia menú de acciones para este grupo
             val itemRepresentante = listaOriginal.first()
             AlmacenItemActions(this).bindRowClick(row, itemRepresentante) {
-                loadAlmacen()
+                loadAlmacen()  // recarga tras operación
             }
 
             table.addView(row)
+            // Línea divisoria
             table.addView(View(this).apply {
                 val h = (resources.displayMetrics.density + .5f).toInt()
                 layoutParams = TableRow.LayoutParams(

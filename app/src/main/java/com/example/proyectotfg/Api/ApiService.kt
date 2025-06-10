@@ -8,8 +8,10 @@ import retrofit2.http.*
 interface ApiService {
 
     /**
-     * Devuelve todos los productos (filtrados por marca si se pasa el parámetro).
-     * El JSON esperado por retrofit se mapeará a List<Producto>.
+     * Obtiene la lista de productos, opcionalmente filtrada por marca.
+     *
+     * @param marca Nombre de la marca para filtrar los productos.
+     * @return Call con la lista de productos obtenida de la API.
      */
     @GET("api/getProductos.php")
     fun getProductosPorMarca(
@@ -17,15 +19,21 @@ interface ApiService {
     ): Call<List<Producto>>
 
     /**
-     * Devuelve todos los registros de stock (tabla `almacen` JOIN con `productos`).
+     * Recupera los registros de stock combinando las tablas `almacen` y `productos`.
+     *
+     * @return Call con la lista de almacenes y sus productos.
      */
     @GET("api/getAlmacen.php")
     fun getAlmacen(): Call<List<Almacen>>
 
     /**
-     * Inserta un nuevo producto. El cuerpo JSON coincide con la data class AddProductoRequest.
-     * Responde AddProductoResponse (que normalmente contendrá { status: "ok", newId: X },
-     * o bien { status: "exists", existingId: Y } si ya existe).
+     * Añade un nuevo producto al sistema.
+     *
+     * El cuerpo de la petición debe coincidir con AddProductoRequest.
+     *
+     * @param req Objeto que contiene los datos del producto a crear.
+     * @return Call con la respuesta AddProductoResponse, donde se indica
+     *         si fue creado o ya existía (y su ID).
      */
     @POST("api/addProducto.php")
     fun addProducto(
@@ -33,9 +41,12 @@ interface ApiService {
     ): Call<AddProductoResponse>
 
     /**
-     * Si el producto ya existe, este endpoint añade solo las fechas de caducidad
-     * para ese producto existente.
-     * El cuerpo JSON coincide con la data class AddAlmacenRequest.
+     * Añade fechas de caducidad a un producto ya existente en inventario.
+     *
+     * Útil cuando el producto ya existe y solo se quieren gestionar nuevas fechas.
+     *
+     * @param req Objeto con el ID de producto y la/s fecha/s a añadir.
+     * @return Call con la respuesta AddAlmacenResponse indicando éxito o error.
      */
     @POST("api/addAlmacen.php")
     fun addAlmacen(
@@ -43,7 +54,10 @@ interface ApiService {
     ): Call<AddAlmacenResponse>
 
     /**
-     * Elimina un producto dado su ID. Retorna AddProductoResponse con status ok/error.
+     * Elimina un producto por su identificador.
+     *
+     * @param id ID único del producto a eliminar.
+     * @return Call con AddProductoResponse indicando resultado de la operación.
      */
     @FormUrlEncoded
     @POST("api/deleteProducto.php")
@@ -52,8 +66,11 @@ interface ApiService {
     ): Call<AddProductoResponse>
 
     /**
-     * Cambia el campo `Disponibles` de un producto (0 o 1).
-     * También retorna AddProductoResponse (status ok o error).
+     * Actualiza el estado de disponibilidad de un producto.
+     *
+     * @param id            ID del producto a modificar.
+     * @param disponibles   Nuevo valor del campo 'Disponibles' (0 o 1).
+     * @return Call con AddProductoResponse con el estado de la actualización.
      */
     @FormUrlEncoded
     @POST("api/available.php")
@@ -63,8 +80,18 @@ interface ApiService {
     ): Call<AddProductoResponse>
 
     /**
-     * Edita por completo la información de un producto (incluyendo stock/almacén).
-     * El endpoint PHP actualizará tanto la tabla productos como la tabla almacen según convenga.
+     * Edita todos los datos de un producto existente, incluyendo stock.
+     *
+     * @param id             ID del producto.
+     * @param producto       Nuevo nombre o código del producto.
+     * @param tamano         Tamaño o presentación (e.g., "500ml").
+     * @param precio         Precio unitario actualizado.
+     * @param marca          Marca asociada.
+     * @param disponibles    Unidades disponibles en stock.
+     * @param almacen        ID del almacén de almacenamiento.
+     * @param cantidad       Cantidad a ajustar en esta operación (opcional).
+     * @param fechaCaducidad Fecha de caducidad (ISO yyyy-MM-dd), si aplica.
+     * @return Call con AddProductoResponse indicando éxito o error.
      */
     @FormUrlEncoded
     @POST("api/editProducto.php")
@@ -81,7 +108,10 @@ interface ApiService {
     ): Call<AddProductoResponse>
 
     /**
-     * Consume un producto (disminuye en 1 su stock en almacen). Retorna ConsumeResponse.
+     * Disminuye en una unidad el stock de un producto consumido.
+     *
+     * @param id ID del producto que se va a consumir.
+     * @return Call con ConsumeResponse que indica el nuevo stock o error.
      */
     @FormUrlEncoded
     @POST("api/consumeProduct.php")

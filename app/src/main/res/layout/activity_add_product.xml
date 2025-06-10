@@ -9,6 +9,7 @@
     android:background="@color/md_theme_inversePrimary"
     tools:context=".AddProductActivity">
 
+    <!-- Scrollable form container -->
     <ScrollView
         android:id="@+id/scrollForm"
         android:layout_width="0dp"
@@ -25,7 +26,7 @@
             android:orientation="vertical"
             android:paddingBottom="24dp">
 
-            <!-- Nombre del producto -->
+            <!-- Nombre del producto: TextInputLayout con campo de texto -->
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
@@ -41,7 +42,7 @@
                     android:textColorHint="@android:color/darker_gray"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Tamaño -->
+            <!-- Tamaño: AutoCompleteTextView dentro de TextInputLayout -->
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
@@ -59,7 +60,7 @@
                     android:textColorHint="@android:color/darker_gray"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Precio -->
+            <!-- Precio (€): campo numérico con decimal -->
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
@@ -77,7 +78,7 @@
                     android:textColorHint="@android:color/darker_gray"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Marca -->
+            <!-- Marca: AutoCompleteTextView para seleccionar marca -->
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
@@ -95,7 +96,7 @@
                     android:textColorHint="@android:color/darker_gray"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Checkboxes -->
+            <!-- Checkboxes para marcar disponibilidad y si almacenar -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -116,7 +117,7 @@
                     android:text="Almacenar"/>
             </LinearLayout>
 
-            <!-- Formulario de Almacén -->
+            <!-- Formulario dinámico de almacén: visible solo si cbAlmacen está marcado -->
             <LinearLayout
                 android:id="@+id/formAlmacen"
                 android:layout_width="match_parent"
@@ -125,7 +126,7 @@
                 android:visibility="gone"
                 android:layout_marginTop="16dp">
 
-                <!-- Cantidad como NumberPicker -->
+                <!-- Cantidad: NumberPicker para elegir número de fechas -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -137,7 +138,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
 
-                <!-- Contenedor dinámico para fechas -->
+                <!-- Contenedor para los TextView generados dinámicamente con fechas -->
                 <LinearLayout
                     android:id="@+id/containerFechas"
                     android:layout_width="match_parent"
@@ -146,7 +147,7 @@
                     android:layout_marginTop="12dp"/>
             </LinearLayout>
 
-            <!-- Guardar -->
+            <!-- Botón Guardar: envía datos a la API -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnGuardar"
                 style="@style/Widget.Material3.Button.OutlinedButton"
@@ -162,7 +163,7 @@
         </LinearLayout>
     </ScrollView>
 
-    <!-- Barra inferior -->
+    <!-- Barra inferior de botones -->
     <View
         android:id="@+id/viewBottom"
         android:layout_width="0dp"
@@ -172,7 +173,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Volver -->
+    <!-- Botón Volver sobre la barra inferior -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/buttonVolver"
         style="@style/Widget.Material3.Button.OutlinedButton"

@@ -16,25 +16,35 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.util.Calendar
 
+/**
+ * Gestiona las acciones disponibles en cada fila de almacén (Almacen).
+ *
+ * Muestra un menú contextual con opciones para modificar, eliminar o consumir un producto.
+ * Se encarga de invocar las llamadas a la API correspondientes y gestionar resultados.
+ *
+ * @param context Contexto de la aplicación para inflar diálogos y Toasts.
+ */
 class AlmacenItemActions(private val context: Context) {
 
+    // Opciones permitidas para tamaño y marca (usadas en diálogo de edición)
     private val tamaños = listOf("Pequeño", "Grande")
     private val marcas = listOf(
         "Cordero", "Fini", "Churruca", "Extremeñas",
         "Fiesta", "Vidal", "Grefusa", "Tosfrit",
-        "Reyes", "Kinder", "Risi", "Matutano",
-        "Jumpers", "Gato"
+        "Reyes", "Kinde", "Risis", "Matutano",
+        "Jumpers", "Gatos"
     )
 
     /**
-     * Asocia un click listener a la fila (rowView). Cuando el usuario pulsa,
-     * se mostrará un PopupMenu con opciones “Modificar”, “Eliminar” y “Consumir”.
-     * Para cada acción, se utiliza el objeto `item` completo.
-     * Al finalizar la acción, se invoca onUpdated().
+     * Asocia un PopupMenu a la vista de fila para ofrecer acciones.
+     * Sólo si el producto está en almacén (almacen == 1).
+     *
+     * @param rowView    Vista de la fila correspondiente.
+     * @param item       Datos del producto en almacén.
+     * @param onUpdated  Callback a invocar tras completar la acción.
      */
     fun bindRowClick(rowView: View, item: Almacen, onUpdated: () -> Unit) {
-        // Sólo permitimos acciones si el ítem está en almacén
-        if (item.almacen != 1) return
+        if (item.almacen != 1) return  // Solo filas de almacén
 
         rowView.setOnClickListener {
             PopupMenu(context, rowView).apply {
@@ -53,9 +63,15 @@ class AlmacenItemActions(private val context: Context) {
         }
     }
 
+    /**
+     * Muestra un diálogo para confirmar eliminación y llama a la API.
+     *
+     * @param item      Elemento a eliminar.
+     * @param onDeleted Callback si la operación es exitosa.
+     */
     private fun confirmDelete(item: Almacen, onDeleted: () -> Unit) {
         AlertDialog.Builder(context)
-            .setTitle("Eliminar “${item.producto}”")
+            .setTitle("Eliminar \"${item.producto}\"")
             .setMessage("¿Seguro que quieres eliminar este producto?")
             .setPositiveButton("Sí") { _, _ ->
                 RetrofitClient.instance.deleteProducto(item.id)
@@ -94,9 +110,15 @@ class AlmacenItemActions(private val context: Context) {
             .show()
     }
 
+    /**
+     * Muestra un diálogo para confirmar consumo de una unidad y llama a la API.
+     *
+     * @param item       Elemento a consumir.
+     * @param onConsumed Callback si la operación es exitosa.
+     */
     private fun confirmConsume(item: Almacen, onConsumed: () -> Unit) {
         AlertDialog.Builder(context)
-            .setTitle("Consumir “${item.producto}”")
+            .setTitle("Consumir \"${item.producto}\"")
             .setMessage("¿Seguro que quieres consumir una unidad?")
             .setPositiveButton("Sí") { _, _ ->
                 RetrofitClient.instance.consumeProduct(item.id)
@@ -110,6 +132,7 @@ class AlmacenItemActions(private val context: Context) {
                                 Toast.makeText(context, "Error al consumir", Toast.LENGTH_SHORT).show()
                                 return
                             }
+                            // Informar cantidad restante
                             if (b.newCount == 0) {
                                 Toast.makeText(context, "Producto agotado", Toast.LENGTH_SHORT).show()
                             } else {
@@ -136,10 +159,18 @@ class AlmacenItemActions(private val context: Context) {
             .show()
     }
 
+    /**
+     * Muestra un diálogo para editar los datos del producto en almacén.
+     * Carga los valores actuales, permite modificarlos y confirma con la API.
+     *
+     * @param item       Elemento a editar.
+     * @param onUpdated  Callback si la operación es exitosa.
+     */
     private fun showEditDialog(item: Almacen, onUpdated: () -> Unit) {
+        // Infla la vista personalizada del diálogo
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_edit_item, null)
 
-        // Mapeamos vistas (sin NumberPicker, porque ya lo quitamos del XML)
+        // Referencia vistas del diálogo
         val etProd  = dialogView.findViewById<TextView>(R.id.etProducto)
         val etSize  = dialogView.findViewById<AutoCompleteTextView>(R.id.etTamano)
         val etPrice = dialogView.findViewById<TextView>(R.id.etPrecio)
@@ -149,21 +180,22 @@ class AlmacenItemActions(private val context: Context) {
         val btnDate = dialogView.findViewById<Button>(R.id.btnDateFilter)
         val tvDate  = dialogView.findViewById<TextView>(R.id.tvFechaSeleccionada)
 
-        // Configuramos los AutoComplete (tamaños y marcas)
+        // ConfiguraAutoComplete para tamaño y marca
         etSize.setAdapter(ArrayAdapter(context, android.R.layout.simple_list_item_1, tamaños))
         etSize.threshold = 1
         etBrand.setAdapter(ArrayAdapter(context, android.R.layout.simple_list_item_1, marcas))
         etBrand.threshold = 1
 
-        // Cargamos valores actuales del item en el diálogo
+        // Carga valores actuales en cada campo
         etProd.text  = item.producto
         etSize.setText(item.tamano, false)
         etPrice.text = item.precio.toString()
         etBrand.setText(item.marca, false)
         cbDisp.isChecked = item.disponibles == 1
-        cbAlm.isChecked = (item.almacen == 1)
-        tvDate.text = item.fechaCaducidad ?: "--/--/----"
+        cbAlm.isChecked  = item.almacen == 1
+        tvDate.text      = item.fechaCaducidad ?: "--/--/----"
 
+        // Configura selector de fecha en diálogo
         btnDate.setOnClickListener {
             val parts = item.fechaCaducidad?.split('/')?.mapNotNull { it.toIntOrNull() }
             val cal = Calendar.getInstance().apply {
@@ -179,10 +211,12 @@ class AlmacenItemActions(private val context: Context) {
             ).show()
         }
 
+        // Construye y muestra el diálogo de confirmación
         AlertDialog.Builder(context)
-            .setTitle("Modificar “${item.producto}”")
+            .setTitle("Modificar \"${item.producto}\"")
             .setView(dialogView)
             .setPositiveButton("Guardar") { _, _ ->
+                // Obtiene valores ingresados
                 val newProd  = etProd.text.toString().trim()
                 val newSize  = etSize.text.toString().trim()
                 val newPrice = etPrice.text.toString().toDoubleOrNull()
@@ -191,7 +225,7 @@ class AlmacenItemActions(private val context: Context) {
                 val newAlm   = if (cbAlm.isChecked) 1 else 0
                 val newDate  = tvDate.text.toString().trim()
 
-                // Validaciones básicas
+                // Validaciones básicas antes de llamar a la API
                 if (newProd.isEmpty() || newSize.isEmpty() || newPrice == null || newBrand.isEmpty()) {
                     Toast.makeText(context, "Rellena campos básicos", Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
@@ -201,13 +235,13 @@ class AlmacenItemActions(private val context: Context) {
                     return@setPositiveButton
                 }
 
+                // Segunda confirmación antes de ejecutar la API
                 AlertDialog.Builder(context)
                     .setTitle("Confirmar cambios")
-                    .setMessage("Guardar cambios en “$newProd”?")
+                    .setMessage("Guardar cambios en \"$newProd\"?")
                     .setPositiveButton("Sí") { _, _ ->
-                        // Para la “cantidad”, ahora simplemente enviamos la que ya tenía.
+                        // Cantidad permanece sin cambios
                         val unchangedCantidad = item.cantidad ?: 1
-
                         RetrofitClient.instance.editProducto(
                             item.id,
                             newProd,
@@ -216,40 +250,21 @@ class AlmacenItemActions(private val context: Context) {
                             newBrand,
                             newDisp,
                             newAlm,
-                            unchangedCantidad,  // no la dejamos modificar
+                            unchangedCantidad,
                             newDate
                         ).enqueue(object : Callback<AddProductoResponse> {
-                            override fun onResponse(
-                                call: Call<AddProductoResponse>,
-                                resp: Response<AddProductoResponse>
-                            ) {
+                            override fun onResponse(call: Call<AddProductoResponse>, resp: Response<AddProductoResponse>) {
                                 if (resp.isSuccessful && resp.body()?.status == "ok") {
-                                    Toast.makeText(
-                                        context,
-                                        "Actualizado correctamente",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                                    Toast.makeText(context, "Actualizado correctamente", Toast.LENGTH_SHORT).show()
                                     onUpdated()
                                 } else {
-                                    Log.e(
-                                        "EditProducto",
-                                        "HTTP ${resp.code()} - ${resp.errorBody()?.string()}"
-                                    )
-                                    Toast.makeText(
-                                        context,
-                                        "Error servidor: ${resp.code()}",
-                                        Toast.LENGTH_LONG
-                                    ).show()
+                                    Log.e("EditProducto", "HTTP ${resp.code()} - ${resp.errorBody()?.string()}")
+                                    Toast.makeText(context, "Error servidor: ${resp.code()}", Toast.LENGTH_LONG).show()
                                 }
                             }
-
                             override fun onFailure(call: Call<AddProductoResponse>, t: Throwable) {
                                 Log.e("EditProducto", "Fallo de red", t)
-                                Toast.makeText(
-                                    context,
-                                    "Fallo de red: ${t.localizedMessage}",
-                                    Toast.LENGTH_LONG
-                                ).show()
+                                Toast.makeText(context, "Fallo de red: ${t.localizedMessage}", Toast.LENGTH_LONG).show()
                             }
                         })
                     }

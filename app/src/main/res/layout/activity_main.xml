@@ -208,7 +208,7 @@
         app:layout_constraintBottom_toBottomOf="@id/viewBottom"
         app:layout_constraintStart_toEndOf="@id/buttonEditar" />
 
-    <!-- Guideline vertical para dividir la pantalla en 65% y 35% -->
+    <!-- Guideline vertical para dividir la pantalla -->
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guidelineVertical"
         android:layout_width="wrap_content"

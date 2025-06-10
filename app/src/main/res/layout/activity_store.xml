@@ -83,7 +83,7 @@
                 app:strokeColor="@android:color/black"
                 app:strokeWidth="2dp"/>
 
-            <!-- NUEVO: Botón reiniciar filtros -->
+            <!-- Botón reiniciar filtros -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnResetFilters"
                 style="@style/Widget.Material3.Button.OutlinedButton"
@@ -156,7 +156,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Botón 'Volver' al pie -->
+    <!-- Botón 'Volver' -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/buttonVolver"
         style="@style/Widget.Material3.Button.OutlinedButton"
